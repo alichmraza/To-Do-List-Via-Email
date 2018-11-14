@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>To Do</title>
+    <script src="https://www.gstatic.com/firebasejs/5.3.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.3.0/firebase-firestore.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <style>
+        body {
+            background-image: url("http://www.hdwallpaperspulse.com/wp-content/uploads/2012/10/Opera-Background-Blue-Swirls1.jpg");
+        }
+    </style>
+
+
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyBCHGwHllzKKef7XVAoOADBv5vG7NmJvII",
+            authDomain: "to-do-list-1d23e.firebaseapp.com",
+            databaseURL: "https://to-do-list-1d23e.firebaseio.com",
+            projectId: "to-do-list-1d23e",
+            storageBucket: "",
+            messagingSenderId: "83449183291"
+        };
+        firebase.initializeApp(config);
+    </script>
+</head>
+<body>
+<h1>To Do List</h1>
+<input type="text" placeholder="List Item" id="input">
+<button onclick="addItem()"> Add Item</button>
+<ol id="list"></ol>
+<!--<button onclick="deleteItem()">Delete</button>-->
+
+<script>
+    // Initialize Cloud Firestore through Firebase
+    var db = firebase.firestore();
+
+    // Disable deprecated features
+    db.settings({
+        timestampsInSnapshots: true
+    });
+
+    var list = document.getElementById('list');
+    var input = document.getElementById('input');
+    var listItems = [];
+
+    function addItem() {
+        db.collection('todo').add({
+            todo: input.value,
+            time: Date.now()
+        })
+        input.value = "";
+    }
+    //    function updateList() {
+    //        alert("ssss")
+    //        list.innerHTML = '';
+    //        for (var i = 0; i < listItems.length; i++) {
+    //            var li = document.createElement('LI');
+    //            li.innerText = listItems[i];
+    //            list.appendChild(li);
+    //        }
+    //    }
+
+
+    db.collection('todo').onSnapshot(function (docs) {
+        console.log(docs.docChanges())
+        docs.docChanges().forEach(function (change) {
+            var d = change.doc.data();
+            d.id = change.doc.id;
+            var li = document.createElement('LI')
+            var button = document.createElement('Button');
+            if (change.type === "added") {
+//                var li = document.createElement('LI');
+                li.innerText = d.todo;
+                console.log(d)
+//                button.setAttribute('onclick', 'deleteTodo(this)');
+                button.setAttribute('id', d.id);
+
+
+                list.appendChild(li);
+                button.innerText = "Delete";
+                li.appendChild(button);
+                button.addEventListener('click', function (e) {
+                    console.log(e);
+                    console.log(li);
+                    list.removeChild(li);
+                    db.collection('todo').doc(d.id).delete()
+                });
+
+
+//                }
+            }
+        })
+    });
+
+    function deleteTodo(e, id) {
+        console.log(id)
+        list.removeChild(e.parentNode)
+        console.log(e.getAttribute(("id")))
+        db.doc(id).delete()
+    }
+
+
+</script>
+<div class="col s6">
+    <div class="row">
+        <div class="col s12 m6">
+            <div class="card blue-grey darken-1">
+                <div class="card-content white-text">
+                    <p>To Create Your Own List Please Sign In First.</p>
+                </div>
+                <div class="card-action">
+                    <a href="Sign%20In.html">Sign In</a>
+                    <!--<a href="Sign%20In.html">Sign In</a>-->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
